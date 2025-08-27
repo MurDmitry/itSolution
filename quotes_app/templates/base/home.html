@@ -5,7 +5,19 @@
     Домашняя страница
 {% endblock %}
 
-<!-- Что будет отображаться на странице -->
+<!-- Домашняя страница с цитатой -->
 {% block content %}
-    <h1>Home page</h1>
+<div class="row justify-content-center align-items-center min-vh-75">
+    <div class="col-12 col-md-8 col-lg-6 text-center">
+        <!-- blockquote - семантический тег для цитат -->
+        <blockquote class="blockquote">
+            <p class="display-5 fw-light text-dark mb-4">
+                <!-- fas fa-quote-left/right - иконки кавычек из Font Awesome -->
+                <i class="fas fa-quote-left text-muted me-2"></i>
+                {{ quote_text }}
+                <i class="fas fa-quote-right text-muted ms-2"></i>
+            </p>
+        </blockquote>
+    </div>
+</div>
 {% endblock content %}
