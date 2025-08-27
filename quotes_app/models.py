@@ -49,11 +49,12 @@ class Quote(models.Model):
     Модель Цитаты:
     1. id: Идентификатор. Автоинкрементное поле. Создается автоматически. PK
     2. text: Текст цитаты. Обязательное поле (Not null)
-    3. source: Источник. FK (Source). Обязательное поле (Not null)
-    4. weight: Вес цитаты. Значение по умолчанию = 1
-    5. views_count: Количество просмотров. Значение по умолчанию = 0
-    6. likes: Количество лайков . Значение по умолчанию = 0
-    7. dislikes: Количество дизлайков. Значение по умолчанию = 0
+    3. author: Автор цитаты. Необязательное поле
+    4. source: Источник. FK (Source). Обязательное поле (Not null)
+    5. weight: Вес цитаты. Значение по умолчанию = 1
+    6. views_count: Количество просмотров. Значение по умолчанию = 0
+    7. likes: Количество лайков . Значение по умолчанию = 0
+    8. dislikes: Количество дизлайков. Значение по умолчанию = 0
     """
 
     text = models.TextField(verbose_name="Текст цитаты")
@@ -63,6 +64,7 @@ class Quote(models.Model):
         related_name='quotes',
         verbose_name="Источник"
     )
+    author = models.CharField(max_length=100, null=True, blank=True, verbose_name="Автор цитаты")
     weight = models.PositiveIntegerField(
         default=1,
         verbose_name="Вес цитаты",
