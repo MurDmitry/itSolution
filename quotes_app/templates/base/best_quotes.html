@@ -7,10 +7,10 @@
 
 <!-- Что будет отображаться на странице -->
 {% block content %}
-    <h1>The best quotes</h1>
+    <h1>Лучшие цитаты</h1>
     
    <div>
-        <table>
+        <table class="table table-bordered table-light">
             <thead>
                 <tr>
                     <th>Идентификатор</th>
@@ -22,8 +22,8 @@
                 {% for quote in quotes %}
                 <tr>
                     <td>{{ quote.id }}</td>
-                    <td>{{ quote.quote }}</td>
-                    <td>{{ quote.rating }}</td>
+                    <td>{{ quote.text }}</td>
+                    <td>{{ quote.weight }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
