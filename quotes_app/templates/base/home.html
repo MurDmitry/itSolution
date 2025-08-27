@@ -31,6 +31,24 @@
                     </small>
                 </div>
             </blockquote>
+
+            <!-- Кнопки лайков и просмотры -->
+            <div class="mt-4">
+                <div class="btn-group" role="group">
+                    <!-- Количество лайков -->
+                    <a href="" class="btn btn-outline-dark">
+                        <i class="fas fa-thumbs-up"></i> {{ likes }}
+                    </a>
+                    <!-- Количество дизлайков -->
+                    <a href="" class="btn btn-outline-dark">
+                        <i class="fas fa-thumbs-down"></i> {{ dislikes }}
+                    </a>
+                </div>
+                <!-- Количество просмотров -->
+                <div class="mt-2 text-muted">
+                    <small>Просмотров: {{ views_count }}</small>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock content %}

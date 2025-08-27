@@ -19,7 +19,10 @@ def home_page(request):
             'quote_author': selected_quote.author,             # Автор цитаты
             'source_title': selected_quote.source.title,       # Откуда (фильм/книга/игра и так далее)
             'source_author': selected_quote.source.author,     # Автор произведения
-            'source_year': selected_quote.source.year          # Год   
+            'source_year': selected_quote.source.year,         # Год  
+            'likes': selected_quote.likes,                     # Количество лайков
+            'dislikes': selected_quote.dislikes,               # Количество дизлайков
+            'views_count': selected_quote.views_count          # Просмотры
         }
    
     return render(request, 'base/home.html', context)
