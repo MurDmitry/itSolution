@@ -33,6 +33,16 @@ class Source(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        if self.author and self.year:                             # Указан автор и год
+            return f"{self.title} ({self.author}, {self.year})"
+        elif self.author:                                         # Указан только автор
+            return f"{self.title} ({self.author})"
+        elif self.year:                                           # Указан только год
+            return f"{self.title} ({self.year})"     
+        else:                                                     # Без автора и года
+            return self.title                                    
+
 
 class Quote(models.Model):
     """
@@ -68,3 +78,6 @@ class Quote(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.text[:50]}... ({self.source.title})"   # Начало цитаты и источник
