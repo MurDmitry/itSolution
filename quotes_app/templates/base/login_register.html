@@ -7,15 +7,31 @@
 
 <!-- Страница с авторизацией -->
 {% block content %}
-    <div>
-        <form method="post" action="">
-            {% csrf_token %}
-            <label>Логин:</label>
-            <input type="text" name="username" placeholder="Введите логин">
-            <label>Пароль:</label>
-            <input type="password" name="password" placeholder="Введите пароль">
+    {% if page == 'login' %}
+        <div>
+            <!-- Авторизация -->
+            <form method="post" action="">
+                {% csrf_token %}
+                <label>Логин:</label>
+                <input type="text" name="username" placeholder="Введите логин">
+                <label>Пароль:</label>
+                <input type="password" name="password" placeholder="Введите пароль">
 
-            <input type="submit" value="Вход">
-        </form> 
-    </div>
+                <input type="submit" value="Вход">
+            </form> 
+            <p>У вас нет учетной записи?</p>
+            <a href="{% url 'register' %}">Зарегистрироваться</a>
+        </div>
+    {% else %}
+        <div>
+            <!-- Регистрация -->
+            <form method="post" action="">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Регистрация">
+            </form>
+            <p>У вас есть учетная запись?</p>
+            <a href="{% url 'login' %}">Авторизироваться</a>
+        </div>
+    {% endif %}
 {% endblock content %}
