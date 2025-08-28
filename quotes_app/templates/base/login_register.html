@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+<!-- Название -->
+{% block title %}
+    Вход
+{% endblock %}
+
+<!-- Страница с авторизацией -->
+{% block content %}
+    <div>
+        <form method="post" action="">
+            {% csrf_token %}
+            <label>Логин:</label>
+            <input type="text" name="username" placeholder="Введите логин">
+            <label>Пароль:</label>
+            <input type="password" name="password" placeholder="Введите пароль">
+
+            <input type="submit" value="Вход">
+        </form> 
+    </div>
+{% endblock content %}

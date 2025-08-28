@@ -1,6 +1,38 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Quote, Source
 import random
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+
+
+# Авторизация (вход)
+def loginPage(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        try:
+            user = User.objects.get(username=username)  # Проверка на наличие пользователя
+        except:
+            messages.error(request, "Такого пользователя не существует")
+
+        # Проверка пароля и логина
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)        # Если все хорошо, то авторизируем пользователя
+            return redirect('home')
+        else:
+            messages.error(request, "Неверные логин или пароль")
+        
+    context = {}
+    return render(request, 'base/login_register.html', context)
+
+
+def logoutUser(request):
+    logout(request)
+    return redirect('home')
 
 
 # Домашняя старница
