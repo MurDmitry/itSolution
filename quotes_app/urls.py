@@ -1,8 +1,5 @@
 from django.urls import path
 from . import views
-from django.conf import settings
-from django.conf.urls.static import static
-
 
 urlpatterns = [
     path('', views.home_page, name="home"),                               # Домашняя страница (home.html)
@@ -12,7 +9,5 @@ urlpatterns = [
     path('register/', views.registerPage, name="register"),               # Регистрация
     path('like/<int:quote_id>/', views.like_quote, name="like_quote"),
     path('dislike/<int:quote_id>/', views.dislike_quote, name="dislike_quote"),
+    path('add_quote/', views.add_quote, name="add_quote"),  # Добавить цитату
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

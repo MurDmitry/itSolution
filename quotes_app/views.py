@@ -159,3 +159,8 @@ def the_best_quotes(request):
 
     context = {'ranked_quotes': ranked_quotes}
     return render(request, 'base/best_quotes.html', context)
+
+
+# Добавить цитату
+def add_quote(request):
+    return render(request, 'base/add_quote.html')
