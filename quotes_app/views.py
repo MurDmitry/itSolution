@@ -6,6 +6,9 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Авторизация (вход в аккаунт)
@@ -61,34 +64,78 @@ def registerPage(request):
     return render(request, 'base/login_register.html', context)
 
 
+@login_required
+@csrf_exempt    # Декоратор, отключающий CSRF защиту для этого view (обычно для API endpoints)
+@require_POST   # Декоратор, разрешающий только POST запросы к этому view
+def like_quote(request, quote_id):
+    try:
+        quote = Quote.objects.get(id=quote_id)
+        quote.toggle_like(request.user)         # Метод (из model.py) переключения лайка для текущего пользователя
+        quote.save()
+        return JsonResponse({                   # JSON ответ с результатом операции
+            'success': True,
+            'likes': quote.likes,               # Количество лайков после изменения
+            'dislikes': quote.dislikes
+        })
+    except Quote.DoesNotExist:
+        return JsonResponse({'success': False})
+
+
+@login_required
+@csrf_exempt
+@require_POST
+def dislike_quote(request, quote_id):
+    try:
+        quote = Quote.objects.get(id=quote_id)
+        quote.toggle_dislike(request.user)        # Метод (из model.py) переключения дизлайка для текущего пользователя
+        quote.save()
+        return JsonResponse({
+            'success': True,
+            'likes': quote.likes,
+            'dislikes': quote.dislikes
+        })
+    except Quote.DoesNotExist:
+        return JsonResponse({'success': False})
+
+
 # Домашняя старница (требует авторизации)
 @login_required(login_url='login')
 def home_page(request):
-    quotes = list(Quote.objects.all().select_related(
-        'source'))   # Данные из таблицы Quote и Source
+    quotes = list(Quote.objects.all().select_related('source'))
 
     if not quotes:
         quote_text = "Цитаты не найдены"
         context = {'quote_text': quote_text}
     else:
-        # Взвешенный случайный выбор (использую random.choices с указанием весов)
         selected_quote = random.choices(
             quotes, weights=[quote.weight for quote in quotes], k=1)[0]
+        
+        # Проверка: если человек (в этой сессии) уже смотрел => просмотр не засчитываю
+        session_key = f'quote_viewed_{selected_quote.id}'
+        if not request.session.get(session_key, False):
+            # Увеличиваю счетчик просмотров только если цитата еще не просмотрена в этой сессии
+            selected_quote.views_count += 1
+            selected_quote.save()
+            request.session[session_key] = True
+        
+        # Проверяю, поставил ли пользователь лайк или дизлайк этой цитате
+        user_liked = request.user in selected_quote.liked_by.all()
+        user_disliked = request.user in selected_quote.disliked_by.all()
 
         context = {
-            'quote_text': selected_quote.text,                 # Текст цитаты
-            'quote_author': selected_quote.author,             # Автор цитаты
-            # Откуда (фильм/книга/игра и так далее)
+            'quote_id': selected_quote.id,  # id цитаты
+            'quote_text': selected_quote.text,
+            'quote_author': selected_quote.author,
             'source_title': selected_quote.source.title,
-            'source_author': selected_quote.source.author,     # Автор произведения
-            'source_year': selected_quote.source.year,         # Год
-            'likes': selected_quote.likes,                     # Количество лайков
-            'dislikes': selected_quote.dislikes,               # Количество дизлайков
-            'views_count': selected_quote.views_count          # Просмотры
+            'source_author': selected_quote.source.author,
+            'source_year': selected_quote.source.year,
+            'likes': selected_quote.likes,                  # Общее количество лайков
+            'dislikes': selected_quote.dislikes,            # Общее количество дизлайков
+            'views_count': selected_quote.views_count,      # Количество просмотров
+            'user_liked': user_liked,                       # Лайкнул ли текущий пользователь
+            'user_disliked': user_disliked                  # Дизлайкнул ли текущий пользователь
         }
-
     return render(request, 'base/home.html', context)
-
 
 # Страница с 10 (на данный момент со всеми. Пока нет фильтрации) самыми популярными цитатами
 @login_required(login_url='login')

@@ -1,24 +1,22 @@
 {% extends 'base.html' %}
+{% load static %}
 
-<!-- Название -->
 {% block title %}
     Домашняя страница
 {% endblock %}
 
-<!-- Домашняя страница с цитатой -->
+
 {% block content %}
+    <link rel="stylesheet" href="{% static 'quotes_app/css/custom.css' %}">
     <div class="row justify-content-center align-items-center min-vh-75">
         <div class="col-12 col-md-8 col-lg-6 text-center">
-            <!-- blockquote - семантический тег для цитат -->
             <blockquote class="blockquote">
                 <p class="display-5 fw-light text-dark mb-4">
-                    <!-- fas fa-quote-left/right - иконки кавычек из Font Awesome -->
                     <i class="fas fa-quote-left text-muted me-2"></i>
                     {{ quote_text }}
                     <i class="fas fa-quote-right text-muted ms-2"></i>
                 </p>
                 
-                <!-- Автор цитаты (если он есть) -->
                 {% if quote_author %}
                 <footer class="blockquote-footer mt-3 fs-4">
                     {{ quote_author }}
@@ -32,23 +30,32 @@
                 </div>
             </blockquote>
 
-            <!-- Кнопки лайков и просмотры -->
+            <!-- Скрытое поле с ID цитаты -->
+            <input type="hidden" id="quote-id" value="{{ quote_id }}">
+
+            {% csrf_token %}
             <div class="mt-4">
                 <div class="btn-group" role="group">
-                    <!-- Количество лайков -->
-                    <a href="" class="btn btn-outline-dark">
-                        <i class="fas fa-thumbs-up"></i> {{ likes }}
-                    </a>
-                    <!-- Количество дизлайков -->
-                    <a href="" class="btn btn-outline-dark">
-                        <i class="fas fa-thumbs-down"></i> {{ dislikes }}
-                    </a>
+                    <!-- Кнопка лайка -->
+                    <button class="btn {% if user_liked %}btn-dark{% else %}btn-outline-dark{% endif %} like-btn">
+                        <i class="fas fa-thumbs-up"></i> 
+                        <span id="likes-count">{{ likes }}</span>
+                    </button>
+                    <!-- Кнопка дизлайка -->
+                    <button class="btn {% if user_disliked %}btn-dark{% else %}btn-outline-dark{% endif %} dislike-btn">
+                        <i class="fas fa-thumbs-down"></i> 
+                        <span id="dislikes-count">{{ dislikes }}</span>
+                    </button>
                 </div>
                 <!-- Количество просмотров -->
                 <div class="mt-2 text-muted">
-                    <small>Просмотров: {{ views_count }}</small>
+                    <small>
+                        <i class="fas fa-eye me-1"></i>
+                        Просмотров: <span id="views-count">{{ views_count }}</span>
+                    </small>
                 </div>
             </div>
         </div>
     </div>
-{% endblock content %}
+    <script src="{% static 'quotes_app/js/reactions.js' %}"></script>
+{% endblock %}

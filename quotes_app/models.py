@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.contrib.auth.models import User
 
 
 class Source(models.Model):
@@ -27,8 +28,10 @@ class Source(models.Model):
         verbose_name="Тип источника"
     )
     title = models.CharField(max_length=200, verbose_name="Название источника")
-    author = models.CharField(max_length=100, null=True, blank=True, verbose_name="Автор/Режиссер")
-    year = models.IntegerField(null=True, blank=True, verbose_name="Год выпуска")
+    author = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="Автор/Режиссер")
+    year = models.IntegerField(
+        null=True, blank=True, verbose_name="Год выпуска")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -39,9 +42,9 @@ class Source(models.Model):
         elif self.author:                                         # Указан только автор
             return f"{self.title} ({self.author})"
         elif self.year:                                           # Указан только год
-            return f"{self.title} ({self.year})"     
+            return f"{self.title} ({self.year})"
         else:                                                     # Без автора и года
-            return self.title                                    
+            return self.title
 
 
 class Quote(models.Model):
@@ -64,7 +67,8 @@ class Quote(models.Model):
         related_name='quotes',
         verbose_name="Источник"
     )
-    author = models.CharField(max_length=100, null=True, blank=True, verbose_name="Автор цитаты")
+    author = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="Автор цитаты")
     weight = models.PositiveIntegerField(
         default=1,
         verbose_name="Вес цитаты",
@@ -74,12 +78,47 @@ class Quote(models.Model):
             MaxValueValidator(100)  # Максимальное значение = 100
         ]
     )
-    views_count = models.PositiveIntegerField(default=0, verbose_name="Количество просмотров")
+    views_count = models.PositiveIntegerField(
+        default=0, verbose_name="Количество просмотров")
     likes = models.PositiveIntegerField(default=0, verbose_name="Лайки")
     dislikes = models.PositiveIntegerField(default=0, verbose_name="Дизлайки")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Связь с пользователем для хранения лайков и дизлайков
+    liked_by = models.ManyToManyField(User, related_name='liked_quotes', blank=True)
+    disliked_by = models.ManyToManyField(User, related_name='disliked_quotes', blank=True)
+
+    def toggle_like(self, user):
+        """Добавить или убрать лайк для цитаты для пользователя"""
+        if user in self.liked_by.all():             # Проверка: есть ли пользователь в списке лайнувших
+            self.liked_by.remove(user)              # Если да (т.е. лайкнул до этого) - убираю лайк
+            self.likes = self.liked_by.count()      # Синхронизация с количеством
+        else:
+            self.liked_by.add(user)                 # Иначе ставлю лайк
+            self.likes = self.liked_by.count()      # Синхронизация с количеством
+            if user in self.disliked_by.all():      # Если он дизлайнул, то теперь к лайкам +1, а к дизлайкам -1 
+                self.disliked_by.remove(user)
+                self.dislikes = self.disliked_by.count()
+
+    def toggle_dislike(self, user):
+        """Добавить или убрать дизлайк для цитаты для пользователя"""
+        if user in self.disliked_by.all():
+            self.disliked_by.remove(user)
+            self.dislikes = self.disliked_by.count()
+        else:
+            self.disliked_by.add(user)
+            self.dislikes = self.disliked_by.count()
+            if user in self.liked_by.all():
+                self.liked_by.remove(user)
+                self.likes = self.liked_by.count()
+    
+    def save(self, *args, **kwargs):
+        self.likes = self.liked_by.count()
+        self.dislikes = self.disliked_by.count()   # Обновляю счетчик лайков на основе актуальных отношений ManyToMany
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.text[:50]}... ({self.source.title})"   # Начало цитаты и источник
+        # Начало цитаты и источник
+        return f"{self.text[:50]}... ({self.source.title})"
