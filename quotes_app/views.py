@@ -9,6 +9,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from .forms import QuoteForm, SourceForm
 
 
 # Авторизация (вход в аккаунт)
@@ -162,5 +163,34 @@ def the_best_quotes(request):
 
 
 # Добавить цитату
+@login_required(login_url='login')
 def add_quote(request):
-    return render(request, 'base/add_quote.html')
+    if request.method == 'POST':
+        quote_form = QuoteForm(request.POST)
+        source_form = SourceForm(request.POST)
+        
+        # Проверяю, какая форма была отправлена
+        if 'add_source' in request.POST:
+            # Обработка добавления источника
+            if source_form.is_valid():
+                source = source_form.save()
+                messages.success(request, f'Источник "{source.title}" успешно добавлен!')
+                return redirect('add_quote')
+        
+        elif 'add_quote' in request.POST:
+            # Обработка добавления цитаты
+            if quote_form.is_valid():
+                quote = quote_form.save(commit=False)  # Не сохраняю сразу в БД
+                quote.save()  # Теперь сохраняю - у цитаты появится id
+                messages.success(request, 'Цитата успешно добавлена!')
+                return redirect('home')
+    
+    else:
+        quote_form = QuoteForm()
+        source_form = SourceForm()
+    
+    context = {
+        'quote_form': quote_form,
+        'source_form': source_form,
+    }
+    return render(request, 'base/add_quote.html', context)

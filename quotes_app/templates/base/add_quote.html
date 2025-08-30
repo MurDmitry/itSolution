@@ -6,6 +6,144 @@
     Добавить цитату
 {% endblock %}
 
-
 {% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Заголовок -->
+            <div class="d-flex align-items-center mb-4">
+                <i class="fas fa-plus-circle fa-2x me-3"></i>
+                <h1 class="mb-0">Добавить цитату</h1>
+            </div>
+
+            <!-- Форма добавления цитаты -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-dark text-white">
+                    Новая цитата
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <!-- Текст цитаты -->
+                        <div class="mb-3">
+                            <label class="form-label">{{ quote_form.text.label }}</label>
+                            {{ quote_form.text }}
+                            {% if quote_form.text.errors %}
+                                <div class="text-danger small">{{ quote_form.text.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Автор цитаты -->
+                        <div class="mb-3">
+                            <label class="form-label">{{ quote_form.author.label }}</label>
+                            {{ quote_form.author }}
+                            {% if quote_form.author.errors %}
+                                <div class="text-danger small">{{ quote_form.author.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Вес цитаты -->
+                        <div class="mb-3">
+                            <label class="form-label">{{ quote_form.weight.label }}</label>
+                            {{ quote_form.weight }}
+                            {% if quote_form.weight.errors %}
+                                <div class="text-danger small">{{ quote_form.weight.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">Чем выше вес, тем чаще цитата будет показываться</div>
+                        </div>
+
+                        <!-- Источник с кнопкой добавления нового -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label">{{ quote_form.source.label }}</label>
+                                <button type="button" class="btn btn-outline-dark btn-sm" data-bs-toggle="collapse" data-bs-target="#sourceForm">
+                                    <i class="fas fa-plus me-1"></i>Добавить источник
+                                </button>
+                            </div>
+                            {{ quote_form.source }}
+                            {% if quote_form.source.errors %}
+                                <div class="text-danger small">{{ quote_form.source.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Кнопка добавления цитаты -->
+                        <div class="d-grid">
+                            <button type="submit" name="add_quote" class="btn btn-dark btn-lg">
+                                <i class="fas fa-save me-2"></i>Добавить цитату
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Форма добавления источника (скрытая по умолчанию) -->
+            <div class="collapse" id="sourceForm">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-secondary text-white">
+                        <i class="fas fa-book me-2"></i>Новый источник
+                    </div>
+                    <div class="card-body">
+                        <form method="POST">
+                            {% csrf_token %}
+                            
+                            <!-- Тип источника -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ source_form.source_type.label }}</label>
+                                {{ source_form.source_type }}
+                                {% if source_form.source_type.errors %}
+                                    <div class="text-danger small">{{ source_form.source_type.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Название источника -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ source_form.title.label }}</label>
+                                {{ source_form.title }}
+                                {% if source_form.title.errors %}
+                                    <div class="text-danger small">{{ source_form.title.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Автор источника -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ source_form.author.label }}</label>
+                                {{ source_form.author }}
+                                {% if source_form.author.errors %}
+                                    <div class="text-danger small">{{ source_form.author.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Год выпуска -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ source_form.year.label }}</label>
+                                {{ source_form.year }}
+                                {% if source_form.year.errors %}
+                                    <div class="text-danger small">{{ source_form.year.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Кнопка добавления источника -->
+                            <div class="d-grid">
+                                <button type="submit" name="add_source" class="btn btn-secondary">
+                                    <i class="fas fa-plus me-2"></i>Добавить источник
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сообщения -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>{{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock content %}
