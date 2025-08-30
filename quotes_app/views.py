@@ -123,7 +123,7 @@ def home_page(request):
         user_disliked = request.user in selected_quote.disliked_by.all()
 
         context = {
-            'quote_id': selected_quote.id,  # id цитаты
+            'quote_id': selected_quote.id,                  # id цитаты
             'quote_text': selected_quote.text,
             'quote_author': selected_quote.author,
             'source_title': selected_quote.source.title,
@@ -137,9 +137,25 @@ def home_page(request):
         }
     return render(request, 'base/home.html', context)
 
-# Страница с 10 (на данный момент со всеми. Пока нет фильтрации) самыми популярными цитатами
+
+# Страница с 10 самыми популярными цитатами
 @login_required(login_url='login')
 def the_best_quotes(request):
-    quotes = Quote.objects.all()    # Данные из таблицы Quote
-    context = {'quotes': quotes}
+    # 10 цитат, отсортированных по лайкам и весу
+    quotes = Quote.objects.all().order_by('-likes', '-weight')[:10]
+    
+    # Данные для таблицы
+    ranked_quotes = []
+    for i, quote in enumerate(quotes, 1):
+        # Текст цитаты с автором и источником
+        author_display = quote.author if quote.author else quote.source.author
+        formatted_text = f'«{quote.text}» - {author_display}, {quote.source.title}'
+        
+        ranked_quotes.append({
+            'position': i,
+            'formatted_text': formatted_text,
+            'likes': quote.likes
+        })
+
+    context = {'ranked_quotes': ranked_quotes}
     return render(request, 'base/best_quotes.html', context)
