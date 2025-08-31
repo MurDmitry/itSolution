@@ -1,3 +1,9 @@
 .min-vh-75 {
     min-height: 75vh;
 }
+
+.alert-custom-info {
+    background-color: #f0f0f0; 
+    color: #333;
+    border-color: #dcdcdc;
+  }

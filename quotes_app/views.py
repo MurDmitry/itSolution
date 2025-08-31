@@ -26,7 +26,7 @@ def loginPage(request):
             # Проверка на наличие пользователя
             user = User.objects.get(username=username)
         except:
-            messages.error(request, "Такого пользователя не существует")
+            messages.error(request, "")
 
         # Проверка пароля и логина
         user = authenticate(request, username=username, password=password)
@@ -61,7 +61,7 @@ def registerPage(request):
             login(request, user)
             return redirect('home')
         else:
-            messages.error(request, 'Ошибка при регистрации')
+            messages.error(request, 'Пароль не удовлетворяет требованиям')
     return render(request, 'base/login_register.html', context)
 
 
@@ -169,22 +169,24 @@ def add_quote(request):
         quote_form = QuoteForm(request.POST)
         source_form = SourceForm(request.POST)
         
-        # Проверяю, какая форма была отправлена
         if 'add_source' in request.POST:
-            # Обработка добавления источника
             if source_form.is_valid():
                 source = source_form.save()
                 messages.success(request, f'Источник "{source.title}" успешно добавлен!')
                 return redirect('add_quote')
         
         elif 'add_quote' in request.POST:
-            # Обработка добавления цитаты
             if quote_form.is_valid():
-                quote = quote_form.save(commit=False)  # Не сохраняю сразу в БД
-                quote.save()  # Теперь сохраняю - у цитаты появится id
-                messages.success(request, 'Цитата успешно добавлена!')
-                return redirect('home')
-    
+                try:
+                    # Сохранение формы без коммита, чтобы получить объект
+                    quote = quote_form.save(commit=False)
+                    quote.save()
+                    quote_form.save_m2m()  # Сохранение связи many-to-many
+                    
+                    messages.success(request, 'Цитата успешно добавлена!')
+                    return redirect('home')
+                except Exception as e:
+                    messages.error(request, f'Ошибка при сохранении: {str(e)}')
     else:
         quote_form = QuoteForm()
         source_form = SourceForm()

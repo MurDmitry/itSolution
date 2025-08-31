@@ -115,9 +115,20 @@ class Quote(models.Model):
                 self.likes = self.liked_by.count()
     
     def save(self, *args, **kwargs):
-        self.likes = self.liked_by.count()
-        self.dislikes = self.disliked_by.count()   # Обновляю счетчик лайков на основе актуальных отношений ManyToMany
         super().save(*args, **kwargs)
+        likes_count = self.liked_by.count()
+        dislikes_count = self.disliked_by.count()
+        
+        updated = False
+        if self.likes != likes_count:
+            self.likes = likes_count
+            updated = True
+        if self.dislikes != dislikes_count:
+            self.dislikes = dislikes_count
+            updated = True
+        
+        if updated:
+            super().save(update_fields=['likes', 'dislikes'])
 
     def __str__(self):
         # Начало цитаты и источник

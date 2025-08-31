@@ -1,5 +1,6 @@
 from django import forms
 from .models import Quote, Source
+from django.core.exceptions import ValidationError
 
 
 # Форма Цитата (Указываю какие поля)
@@ -30,6 +31,30 @@ class QuoteForm(forms.ModelForm):
             'weight': 'Вес цитаты (1-100)*',
             'source': 'Источник*',
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        text = cleaned_data.get('text')
+        source = cleaned_data.get('source')
+
+        if not text or not source:
+            # Если обязательные поля не заполнены - нет смысла дальше проверять
+            return cleaned_data
+
+        # Проверка на дубликат цитаты у того же источника
+        duplicate = Quote.objects.filter(text=text.strip(), source=source)
+        if self.instance.pk:
+            duplicate = duplicate.exclude(pk=self.instance.pk)
+        if duplicate.exists():
+            raise ValidationError('Такая цитата уже существует для данного источника.')
+
+        # Проверка на максимум 3 цитаты у источника
+        count_quotes = Quote.objects.filter(source=source).count()
+        if not self.instance.pk and count_quotes >= 3:
+            raise ValidationError('Нельзя добавлять более 3 цитат для одного источника.')
+
+        return cleaned_data
+
     
 
 # Форма Источник (указываю какие поля)

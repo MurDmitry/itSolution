@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}
     {% if page == 'login' %}Вход{% else %}Регистрация{% endif %}
@@ -48,6 +49,17 @@
           </p>
 
         {% else %}
+         <link rel="stylesheet" href="{% static 'quotes_app/css/custom.css' %}">
+          <!-- Правила сложности пароля -->
+          <div class="alert mb-3 alert-custom-info">
+            <h5>Требования к паролю:</h5>
+            <ul class="mb-0">
+              <li>Пароль должен быть минимум 8 символов</li>
+              <li>Не должен быть слишком простым или слишком похожим на персональные данные</li>
+              <li>Рекомендуется использовать сочетание букв, цифр и специальных символов</li>
+            </ul>
+          </div>
+
           <!-- Форма регистрации -->
           <form method="post" action="">
             {% csrf_token %}
